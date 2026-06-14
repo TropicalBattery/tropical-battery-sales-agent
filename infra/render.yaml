@@ -1,0 +1,25 @@
+# Render gives you a wss:// TLS endpoint out of the box (required by ConversationRelay).
+services:
+  - type: web
+    name: tropical-battery-sales-agent
+    env: node
+    plan: starter
+    buildCommand: npm install && npm run build
+    startCommand: node dist/server.js
+    healthCheckPath: /health
+    envVars:
+      - key: PUBLIC_WSS_URL
+        sync: false
+      - key: TWILIO_ACCOUNT_SID
+        sync: false
+      - key: TWILIO_AUTH_TOKEN
+        sync: false
+      - key: ELEVENLABS_VOICE_ID
+        sync: false
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: LEADS_SUPABASE_SERVICE_KEY
+        sync: false
+      - key: INVENTORY_SUPABASE_KEY
+        sync: false
+# Alternative hosts that also give wss TLS: Fly.io, Railway, a TLS-terminating VPS.

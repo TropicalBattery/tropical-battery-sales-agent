@@ -1,0 +1,36 @@
+sequenceDiagram
+    actor Caller
+    participant Tw as Twilio Voice (ASR+TTS)
+    participant App as Sales Agent (WS service)
+    participant Claude as Claude (brain)
+    participant Inv as Inventory DB (read)
+    participant Leads as Leads DB (write)
+
+    Caller->>Tw: Dials (876) 499-0815
+    Tw->>App: POST /voice
+    App-->>Tw: TwiML <Connect><ConversationRelay wss://…>
+    Tw-->>Caller: Speaks welcome greeting (ElevenLabs)
+    Tw->>App: WS open + setup/connected (callSid, from)
+
+    loop Each caller turn
+        Caller->>Tw: Speaks
+        Tw->>App: prompt {voicePrompt: transcript}
+        App->>Claude: messages.stream (system + history + tools)
+        Claude-->>App: text tokens
+        App-->>Tw: text {token, last:false} (streamed)
+        opt Claude calls a tool
+            Claude-->>App: tool_use (check_availability / capture_lead / …)
+            App->>Inv: soft availability lookup
+            Inv-->>App: per-branch stock
+            App->>Leads: insert lead (scored)
+            App->>Claude: tool_result
+            Claude-->>App: follow-up text
+            App-->>Tw: text {token, last:false}
+        end
+        App-->>Tw: text {token:"", last:true}
+        Tw-->>Caller: Speaks reply
+    end
+
+    Caller->>Tw: Hangs up
+    Tw->>App: WS close
+    App->>Leads: insert call_log (transcript, duration)
