@@ -24,7 +24,7 @@ export const config = {
     elevenLabsVoiceId: process.env.ELEVENLABS_VOICE_ID ?? "yuS5yvxd9cdXv5KzBa74", // "Max" sales voice
     asrProvider: process.env.ASR_PROVIDER ?? "deepgram",
     asrSpeechModel: process.env.ASR_SPEECH_MODEL ?? "nova-2-phonecall",
-    ttsProvider: process.env.TTS_PROVIDER ?? "elevenlabs",
+    ttsProvider: process.env.TTS_PROVIDER ?? "ElevenLabs",
     language: process.env.AGENT_LANGUAGE ?? "en-US",
   },
 
