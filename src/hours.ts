@@ -1,4 +1,4 @@
-import { REP_HOURS, config } from "./config.js";
+import { REP_HOURS, STORE_HOURS, AGENT_PADDING_HOURS, config } from "./config.js";
 
 /** Day-of-week (0=Sun..6=Sat) and hour in America/Jamaica (no DST, UTC-5). */
 export function localParts(now: Date = new Date()): { dow: number; hour: number } {
@@ -45,4 +45,20 @@ export function callbackPlan(now: Date = new Date()): CallbackPlan {
       ? "Our reps are off for the weekend, so I'll have someone call you first thing Monday morning"
       : "Our reps have finished for the day, so I'll have someone call you first thing tomorrow morning",
   };
+}
+
+
+/** The agent answers from (store open − padding) to (store close + padding). */
+export function agentWindow(dow: number): readonly [number, number] | null {
+  const s = STORE_HOURS[dow];
+  if (!s) return null;
+  return [s[0] - AGENT_PADDING_HOURS, s[1] + AGENT_PADDING_HOURS];
+}
+
+/** Is the agent "working" right now (within its padded window)? */
+export function agentActive(now: Date = new Date()): boolean {
+  const { dow, hour } = localParts(now);
+  const w = agentWindow(dow);
+  if (!w) return false;
+  return hour >= w[0] && hour < w[1];
 }

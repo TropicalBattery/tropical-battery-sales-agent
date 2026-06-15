@@ -64,3 +64,24 @@ export const REP_HOURS = {
   5: [8, 17] as const,
   6: null,           // Saturday — PLACEHOLDER: reps off (the gap this agent fills). Confirm Sat hours.
 } as Record<number, readonly [number, number] | null>;
+
+
+/**
+ * Store opening hours (from Google Business, Montego Bay panel; treated as standard
+ * across branches — confirm). Close is 5pm; Sunday closed. OPEN HOUR is fuzzy in the
+ * screenshot — defaulting to 6am; ⚠️ CONFIRM 6 vs 8 (override via STORE_OPEN_HOUR).
+ */
+export const STORE_OPEN_HOUR = Number(process.env.STORE_OPEN_HOUR ?? 6);
+export const STORE_CLOSE_HOUR = 17; // 5pm
+export const AGENT_PADDING_HOURS = Number(process.env.AGENT_PADDING_HOURS ?? 1);
+
+// 0=Sun .. 6=Sat. null = store closed that day. [openHour, closeHour) local (America/Jamaica).
+export const STORE_HOURS: Record<number, readonly [number, number] | null> = {
+  0: null,                                            // Sunday — closed
+  1: [STORE_OPEN_HOUR, STORE_CLOSE_HOUR],
+  2: [STORE_OPEN_HOUR, STORE_CLOSE_HOUR],
+  3: [STORE_OPEN_HOUR, STORE_CLOSE_HOUR],
+  4: [STORE_OPEN_HOUR, STORE_CLOSE_HOUR],
+  5: [STORE_OPEN_HOUR, STORE_CLOSE_HOUR],
+  6: [STORE_OPEN_HOUR, STORE_CLOSE_HOUR],             // Saturday — OPEN per Google
+};

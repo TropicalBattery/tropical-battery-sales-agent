@@ -33,3 +33,25 @@ describe("hours", () => {
     expect(plan.routingTag).toBe("sales-immediate");
   });
 });
+
+import { agentActive, agentWindow } from "../src/hours.js";
+
+describe("agent window", () => {
+  it("active Saturday midday (store open)", () => {
+    expect(agentActive(at("2026-06-13T15:00:00Z"))).toBe(true); // Sat 10:00 JM
+  });
+  it("inactive on Sunday (store closed)", () => {
+    expect(agentActive(at("2026-06-14T17:00:00Z"))).toBe(false); // Sun 12:00 JM
+  });
+  it("active 1h before open (5am with 6am open)", () => {
+    // Mon 05:30 JM = 10:30 UTC
+    expect(agentActive(at("2026-06-15T10:30:00Z"))).toBe(true);
+  });
+  it("inactive after close+1h (6pm)", () => {
+    // Mon 18:30 JM = 23:30 UTC
+    expect(agentActive(at("2026-06-15T23:30:00Z"))).toBe(false);
+  });
+  it("window is store hours padded by 1h", () => {
+    expect(agentWindow(1)).toEqual([5, 18]); // [6-1, 17+1] with default 6am open
+  });
+});
