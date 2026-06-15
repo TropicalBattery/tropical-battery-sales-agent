@@ -1,7 +1,7 @@
 services:
   - type: web
     name: tropical-battery-sales-agent
-    env: node
+    runtime: node
     plan: starter
     buildCommand: npm install --include=dev && npm run build
     startCommand: node dist/server.js
