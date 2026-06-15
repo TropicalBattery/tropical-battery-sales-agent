@@ -1,4 +1,5 @@
--- APPLIED to the IT Help Desk project (jnopqxeqziazaqknuvmy) on 2026-06-14.
+-- APPLIED to the dedicated 'Sales Call Agent' project (ztgerulyxaltuhsodrne, us-east-1) on 2026-06-15.
+-- (Originally trialled in the IT Help Desk project; moved to its own project on Pro plan.)
 -- `sales` schema keeps lead data separable from IT Helpdesk tables and trivially
 -- migratable to a dedicated "Sales Call Agent" project when going live.
 create schema if not exists sales;

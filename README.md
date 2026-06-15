@@ -9,7 +9,7 @@ Real-time AI phone agent for Tropical Battery's retail store: answers inbound ca
 - ✅ WebSocket service: TwiML webhook + ConversationRelay handler, token streaming, barge-in, dtmf.
 - ✅ Claude streaming + tool loop (`answer_faq`, `check_product_availability`, `capture_lead`, `book_callback`).
 - ✅ Lead scoring (retail BANT) + business-hours/callback gating (America/Jamaica).
-- ✅ Supabase **leads** schema (`sales` schema, IT Help Desk project) — insert→view→delete round-trip tested.
+- ✅ Supabase **leads** in a **dedicated 'Sales Call Agent' project** (`ztgerulyxaltuhsodrne`, us-east-1) — insert→view→delete round-trip tested.
 - ✅ Supabase **inventory** read view (`view_branch_availability`) — soft per-branch availability, live data verified.
 - ✅ Typecheck clean; 9 unit tests + 6 smoke checks passing; server boots and serves valid TwiML.
 
@@ -20,7 +20,7 @@ Real-time AI phone agent for Tropical Battery's retail store: answers inbound ca
 - ⏳ Branch **opening hours** (esp. Saturday) — placeholder in `src/config.ts` (`REP_HOURS`).
 - ⏳ Repo home: this repo (`tropical-battery-sales-agent`) vs a monorepo — and a GitHub surface that can create it.
 - ⏳ Deploy to a TLS host; set `PUBLIC_WSS_URL`; point the Twilio number's Voice webhook at `/voice`.
-- ⏳ Decide $0 (current `sales` schema) vs dedicated $10/mo Supabase project at go-live.
+- ✅ Dedicated $10/mo Supabase project created (Pro plan) — leads wired to it; temporary IT-Helpdesk schema removed.
 
 ## Run locally
 ```bash

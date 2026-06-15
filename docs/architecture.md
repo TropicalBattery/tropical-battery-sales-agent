@@ -29,7 +29,7 @@ See `sequence-diagram.mmd`. In short: call → TwiML → WS opens → each calle
 
 ## Data layer — verified live (2026-06-14)
 - **Inventory** (`qunnxsxeevoeflqfrzwz`): `view_branch_availability` returns in-stock SKUs per retail branch (Ferry 407, Ashenheim 384, Mandeville 373, MoBay 365, Grove 327, Ocho Rios 249). Products are deduped (each SKU appears ~2×) and limited to the six retail `location_code`s.
-- **Leads** (`jnopqxeqziazaqknuvmy`, `sales` schema): insert→view→delete round-trip verified; `view_leads` exposes Jamaica-local date/day-of-week for Power BI. RLS on; backend uses the service-role key.
+- **Leads** (dedicated **Sales Call Agent** project `ztgerulyxaltuhsodrne`, us-east-1, `sales` schema): insert→view→delete round-trip verified; `view_leads` exposes Jamaica-local date/day-of-week for Power BI. RLS on; backend uses the service-role key.
 
 ## Deploy
 Any host that terminates TLS and gives a `wss://` URL: Render (`infra/render.yaml`), Fly.io, Railway, or a TLS VPS (`infra/Dockerfile`). Set `PUBLIC_WSS_URL` to the deployed `wss://…/ws/voice` and point the Twilio number's Voice webhook at `POST /voice`.
