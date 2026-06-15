@@ -12,10 +12,11 @@ describe("twiml", () => {
     expect(xml).toMatch(/url="wss:/);
   });
 
-  it("outside the window (Sunday): closed message + hangup, no ConversationRelay", () => {
+  it("outside the window (Sunday): closed message + voicemail capture, no ConversationRelay", () => {
     const xml = buildVoiceTwiml(sunday);
     expect(xml).toContain("<Say>");
-    expect(xml).toContain("<Hangup/>");
+    expect(xml).toContain("<Record");
+    expect(xml).toContain('action="/voicemail"');
     expect(xml).not.toContain("ConversationRelay");
   });
 });

@@ -2,27 +2,32 @@ import twilio from "twilio";
 import { config } from "./config.js";
 import { agentActive } from "./hours.js";
 
-/** Spoken when a call lands outside the agent's active window. */
-function closedMessage(): string {
-  return (
-    `Thanks for calling Tropical Battery. We're closed at the moment — our store is open ` +
-    `Monday to Saturday, until five o'clock. Please call back during opening hours. ` +
-    `For roadside battery help any time, call 1 8 8 8, 7 6 7, 4 2 2 5. Goodbye!`
-  );
-}
-
 /**
  * Inbound voice webhook TwiML.
- * - Inside the agent window  → <Connect><ConversationRelay> (the AI answers; Twilio does ASR+TTS).
- * - Outside the window       → a short closed message, then hang up.
- * If RECORD_CALLS=true, a consent line is spoken and <Start><Recording> is emitted BEFORE <Connect>.
+ * - Inside the agent window  → <Connect><ConversationRelay> (the AI answers).
+ * - Outside the window       → closed message + voicemail capture (so the lead isn't lost).
  */
 export function buildVoiceTwiml(now: Date = new Date()): string {
   const { VoiceResponse } = twilio.twiml;
   const vr = new VoiceResponse();
 
   if (!agentActive(now)) {
-    vr.say(closedMessage());
+    vr.say(
+      "Thanks for calling Tropical Battery. We're closed at the moment — open Monday to Saturday, until five. " +
+      "If you'd like a rep to call you back, please leave your name, number, and what you need after the beep. " +
+      "For roadside battery help any time, call 1 8 8 8, 7 6 7, 4 2 2 5.",
+    );
+    vr.record({
+      action: "/voicemail",
+      method: "POST",
+      maxLength: 120,
+      playBeep: true,
+      finishOnKey: "#",
+      transcribe: true,
+      transcribeCallback: "/voicemail-transcription",
+    });
+    // If they don't record, still close gracefully.
+    vr.say("We didn't catch a message. Please call back during opening hours. Goodbye!");
     vr.hangup();
     return vr.toString();
   }
@@ -50,5 +55,14 @@ export function buildVoiceTwiml(now: Date = new Date()): string {
   } as Record<string, unknown>);
   (cr as unknown as { parameter: (a: Record<string, string>) => void }).parameter({ name: "from", value: "{{From}}" });
 
+  return vr.toString();
+}
+
+/** TwiML returned after a voicemail is recorded (the <Record action> target). */
+export function buildVoicemailThanksTwiml(): string {
+  const { VoiceResponse } = twilio.twiml;
+  const vr = new VoiceResponse();
+  vr.say("Thank you! A rep will call you back during opening hours. Goodbye!");
+  vr.hangup();
   return vr.toString();
 }

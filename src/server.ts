@@ -3,10 +3,10 @@ import { createServer } from "node:http";
 import { WebSocketServer, type WebSocket } from "ws";
 import { config } from "./config.js";
 import { log } from "./logger.js";
-import { buildVoiceTwiml } from "./twiml.js";
+import { buildVoiceTwiml, buildVoicemailThanksTwiml } from "./twiml.js";
 import { handlePrompt } from "./conversation.js";
 import { AnthropicLlm } from "./llm.js";
-import { insertCallLog } from "./leadsStore.js";
+import { insertCallLog, insertVoicemailLead, updateLeadTranscription } from "./leadsStore.js";
 import type { CallSession, RelayInbound, RelayOutbound } from "./types.js";
 
 const app = express();
@@ -19,6 +19,23 @@ app.get("/health", (_req, res) => res.json({ ok: true, agent: config.agentName }
 app.post("/voice", (_req, res) => {
   res.type("text/xml").send(buildVoiceTwiml());
 });
+
+// After-hours voicemail recorded -> create a lead from caller number + recording.
+app.post("/voicemail", async (req, res) => {
+  const { From, RecordingUrl, CallSid } = req.body ?? {};
+  try { await insertVoicemailLead({ phone: From, recordingUrl: RecordingUrl, callSid: CallSid }); }
+  catch (e) { log.error("voicemail lead failed", String(e)); }
+  res.type("text/xml").send(buildVoicemailThanksTwiml());
+});
+
+// Twilio posts the voicemail transcription asynchronously -> enrich the lead.
+app.post("/voicemail-transcription", async (req, res) => {
+  const { TranscriptionText, CallSid } = req.body ?? {};
+  try { await updateLeadTranscription(CallSid, TranscriptionText ?? ""); }
+  catch (e) { log.error("voicemail transcription update failed", String(e)); }
+  res.sendStatus(204);
+});
+
 
 const server = createServer(app);
 const wss = new WebSocketServer({ server, path: "/ws/voice" });

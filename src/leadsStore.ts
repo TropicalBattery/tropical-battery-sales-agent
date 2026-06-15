@@ -1,7 +1,8 @@
 import { createClient } from "@supabase/supabase-js";
 import { config } from "./config.js";
 import { log } from "./logger.js";
-import type { ScoredLead, CallSession } from "./types.js";
+import type { ScoredLead, CallSession, LeadDraft } from "./types.js";
+import { scoreLead } from "./leadScore.js";
 
 let client: any = null;
 function db(): any {
@@ -38,4 +39,34 @@ export async function insertCallLog(session: CallSession, endedReason: string): 
     recorded: config.recordCalls,
   });
   if (error) log.error("insertCallLog failed", error.message);
+}
+
+
+/** After-hours voicemail → a lead with the recording + caller number (rep listens). */
+export async function insertVoicemailLead(opts: { phone?: string; recordingUrl?: string; callSid: string }): Promise<string | null> {
+  const draft: LeadDraft = {
+    caller_phone: opts.phone,
+    product_need: "After-hours voicemail",
+    notes_summary: "After-hours voicemail — listen to the recording; transcription may follow.",
+    source: "inbound-call-afterhours-voicemail",
+  };
+  const scored = scoreLead(draft);
+  const sb = db();
+  if (!sb) { log.warn("leads DB not configured; voicemail lead not persisted"); return null; }
+  const { data, error } = await sb.from("leads")
+    .insert({ ...scored, recording_url: opts.recordingUrl, call_sid: opts.callSid })
+    .select("id").single();
+  if (error) { log.error("insertVoicemailLead failed", error.message); return null; }
+  log.info("voicemail lead captured", { id: data?.id });
+  return data?.id ?? null;
+}
+
+/** Best-effort: enrich a voicemail lead once Twilio posts its transcription. */
+export async function updateLeadTranscription(callSid: string, transcription: string): Promise<void> {
+  const sb = db();
+  if (!sb || !transcription) return;
+  const { error } = await sb.from("leads")
+    .update({ notes_summary: `After-hours voicemail: ${transcription.slice(0, 480)}` })
+    .eq("call_sid", callSid);
+  if (error) log.error("updateLeadTranscription failed", error.message);
 }
