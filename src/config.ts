@@ -45,6 +45,7 @@ export const config = {
   },
 
   recordCalls: (process.env.RECORD_CALLS ?? "false").toLowerCase() === "true",
+  forceAgentActive: (process.env.FORCE_AGENT_ACTIVE ?? "false").toLowerCase() === "true", // testing: answer at any hour
   makeNotifyWebhook: process.env.MAKE_NOTIFY_WEBHOOK ?? "",
   timezone: "America/Jamaica",
 } as const;

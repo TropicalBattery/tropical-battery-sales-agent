@@ -57,6 +57,7 @@ export function agentWindow(dow: number): readonly [number, number] | null {
 
 /** Is the agent "working" right now (within its padded window)? */
 export function agentActive(now: Date = new Date()): boolean {
+  if (config.forceAgentActive) return true; // testing override
   const { dow, hour } = localParts(now);
   const w = agentWindow(dow);
   if (!w) return false;
