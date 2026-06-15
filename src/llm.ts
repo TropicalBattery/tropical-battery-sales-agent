@@ -18,12 +18,13 @@ export interface LlmClient {
 }
 
 export class AnthropicLlm implements LlmClient {
-  private client: Anthropic;
-  constructor() {
-    this.client = new Anthropic({ apiKey: config.anthropic.apiKey });
+  private client: Anthropic | null = null;
+  private get(): Anthropic {
+    if (!this.client) this.client = new Anthropic({ apiKey: config.anthropic.apiKey });
+    return this.client;
   }
   async *run(params: LlmRunParams): AsyncGenerator<LlmEvent> {
-    const stream = this.client.messages.stream({
+    const stream = this.get().messages.stream({
       model: config.anthropic.model,
       max_tokens: 512,
       system: params.system,

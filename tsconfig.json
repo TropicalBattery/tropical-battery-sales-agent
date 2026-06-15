@@ -4,13 +4,17 @@
     "module": "ES2022",
     "moduleResolution": "bundler",
     "outDir": "dist",
-    "rootDir": ".",
+    "rootDir": "src",
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
     "resolveJsonModule": true,
     "forceConsistentCasingInFileNames": true,
-    "types": ["node"]
+    "types": [
+      "node"
+    ]
   },
-  "include": ["src", "scripts", "test"]
+  "include": [
+    "src"
+  ]
 }
